@@ -13,8 +13,6 @@ from ntgcalls import TelegramServerError
 from pyrogram import Client as PyroClient
 from pyrogram import errors
 from pytdbot import Client, types
-
-import config
 from pytgcalls import PyTgCalls, exceptions
 from pytgcalls.types import (
     AudioQuality,
@@ -25,11 +23,12 @@ from pytgcalls.types import (
     VideoQuality,
     stream,
 )
+
+import config
 from src.database import db
 from src.logger import LOGGER
 from src.modules.utils import PlayButton, get_audio_duration, sec_to_min, send_logger
 from src.modules.utils.cacher import chat_cache
-from src.modules.utils.thumbnails import gen_thumb
 from src.platforms import ApiData, JiosaavnData, YouTubeData
 from src.platforms.dataclass import CachedTrack
 from src.platforms.downloader import MusicServiceWrapper
@@ -366,7 +365,6 @@ class MusicBot:
 
             duration = song.duration or await get_audio_duration(file_path)
             text = (
-                f"<b>Now playing <a href='{song.thumbnail or 'https://t.me/FallenProjects'}'>:</a></b>\n\n"
                 f"‣ <b>Title:</b> {song.name}\n"
                 f"‣ <b>Duration:</b> {sec_to_min(duration)}\n"
                 f"‣ <b>Requested by:</b> {song.user}"
@@ -452,9 +450,7 @@ class MusicBot:
             if recommendations := await MusicServiceWrapper().get_recommendations():
                 buttons = [
                     [
-                        types.InlineKeyboardButton(
                             f"{track.name[:18]} - {track.artist}",
-                            type=types.InlineKeyboardButtonTypeCallback(
                                 f"play_{track.platform}_{track.id}".encode()
                             ),
                         )
