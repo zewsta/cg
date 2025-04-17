@@ -23,7 +23,6 @@ from src.modules.utils.play_helpers import (
     unban_ub,
     user_status_cache,
 )
-from src.modules.utils.thumbnails import gen_thumb
 from src.platforms import YouTubeData
 from src.platforms.dataclass import CachedTrack, MusicTrack, PlatformTracks
 from src.platforms.downloader import MusicServiceWrapper
@@ -62,7 +61,6 @@ def build_song_selection_message(
     user_by: str, tracks: list[MusicTrack]
 ) -> tuple[str, types.ReplyMarkupInlineKeyboard]:
     """
-    Build a message and inline keyboard for song selection.
 
     Args:
         user_by: The username of the person requesting the song selection.
@@ -76,9 +74,7 @@ def build_song_selection_message(
     text = f"{user_by}, select a song to play:" if user_by else "Select a song to play:"
     buttons = [
         [
-            types.InlineKeyboardButton(
                 f"{rec.name[:18]} - {rec.artist}",
-                type=types.InlineKeyboardButtonTypeCallback(
                     f"play_{rec.platform.lower()}_{rec.id}".encode()
                 ),
             )
@@ -164,7 +160,6 @@ async def _handle_single_track(
             f"‣ <b>Duration:</b> {sec_to_min(song.duration)}\n"
             f"‣ <b>Requested by:</b> {song.user}"
         )
-        thumb = await gen_thumb(song) if await db.get_thumb_status(chat_id) else ""
         await _update_msg_with_thumb(
             c,
             msg,
@@ -182,7 +177,6 @@ async def _handle_single_track(
     except CallError as e:
         return await edit_text(msg, text=f"⚠️ {e}")
 
-    thumb = await gen_thumb(song) if await db.get_thumb_status(chat_id) else ""
     text = (
         f"🎵 <b>Now playing:</b>\n\n"
         f"‣ <b>Title:</b> {song.name}\n"
@@ -289,9 +283,7 @@ async def _handle_recommendations(
         await edit_text(msg, text=text, reply_markup=SupportButton)
         return
 
-    text, keyboard = build_song_selection_message("", recommendations.tracks)
     await edit_text(
-        msg, text=text, reply_markup=keyboard, disable_web_page_preview=True
     )
 
 
@@ -368,9 +360,7 @@ async def _handle_text_search(
             msg, text="❌ Unable to retrieve song info.", reply_markup=SupportButton
         )
 
-    text, keyboard = build_song_selection_message(user_by, search.tracks)
     await edit_text(
-        msg, text=text, reply_markup=keyboard, disable_web_page_preview=True
     )
     return None
 
